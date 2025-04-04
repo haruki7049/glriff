@@ -1,9 +1,10 @@
 import gleam/option.{type Option}
 
 pub type RIFF {
-  RIFF(header: BitArray, chunk: Option(List(Chunk)))
+  RIFF(chunk: Option(Chunk))
 }
 
 pub type Chunk {
   Chunk(id: BitArray, data: BitArray)
+  List(chunks: List(Chunk))
 }
