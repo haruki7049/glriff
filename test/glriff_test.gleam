@@ -11,8 +11,11 @@ pub fn glriff_test() {
 
   glriff.RIFF(
     header: <<"RIFF">>,
-    chunk: Some(
-      glriff.Chunk(id: <<"fmt ">>, size: 1000, data: <<"EXAMPLE_DATA">>),
-    ),
+    chunk: Some([glriff.Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)]),
+  )
+
+  glriff.RIFF(
+    header: <<"RIFF">>,
+    chunk: Some([glriff.Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)]),
   )
 }
