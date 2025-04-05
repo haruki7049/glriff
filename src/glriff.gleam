@@ -6,5 +6,4 @@ pub type RIFF {
 
 pub type Chunk {
   Chunk(id: BitArray, data: BitArray)
-  List(chunks: List(Chunk))
 }
