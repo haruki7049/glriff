@@ -44,10 +44,18 @@
           };
 
           treefmt = {
-            projectRootFile = "flake.nix";
+            projectRootFile = ".git/config";
+
+            # Nix
             programs.nixfmt.enable = true;
+
+            # Gleam
             programs.gleam.enable = true;
+
+            # GitHub Actions
             programs.actionlint.enable = true;
+
+            # Markdown
             programs.mdformat.enable = true;
           };
 
@@ -64,9 +72,6 @@
               # Gleam-lang
               pkgs.gleam
               pkgs.erlang
-              #pkgs.rebar3
-              #pkgs.elixir
-              #pkgs.deno
             ];
           };
         };
