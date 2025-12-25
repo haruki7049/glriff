@@ -1,6 +1,6 @@
 # glriff
 
-A library to read XDG Base Directory in pure Gleam-lang.
+A library to express RIFF format in pure Gleam-lang
 
 [![Package Version](https://img.shields.io/hexpm/v/glriff)](https://hex.pm/packages/glriff)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/glriff/)
