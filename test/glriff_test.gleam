@@ -10,7 +10,7 @@ pub fn main() {
   gleeunit.main()
 }
 
-pub fn chunk_test() {
+pub fn chunk_to_bit_array_test() {
   Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   |> chunk.to_bit_array()
   |> should.equal(
@@ -19,7 +19,7 @@ pub fn chunk_test() {
   )
 }
 
-pub fn list_chunk_test() {
+pub fn list_chunk_to_bit_array_test() {
   let fmt_chunk: Chunk = Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   let list_chunk: Chunk = ListChunk(chunks: [fmt_chunk, fmt_chunk])
 
@@ -40,7 +40,7 @@ pub fn list_chunk_test() {
   )
 }
 
-pub fn riff_chunk_test() {
+pub fn riff_chunk_to_bit_array_test() {
   let fmt_chunk: Chunk = Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   let riff_chunk: Chunk = RiffChunk(chunk: Some(fmt_chunk))
 
@@ -104,7 +104,7 @@ pub fn read_riff_chunk_test() {
   )
 }
 
-pub fn read_wavefile_test() {
+fn read_wavefile_test() {
   let assert Ok(wavefile): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/test_data.wav")
 
