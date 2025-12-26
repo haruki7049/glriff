@@ -73,6 +73,8 @@
               pkgs.gleam
               pkgs.erlang
               pkgs.nodePackages.nodejs
+              pkgs.deno
+              pkgs.bun
             ];
           };
         };
