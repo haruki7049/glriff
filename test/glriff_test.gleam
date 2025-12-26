@@ -1,3 +1,4 @@
+import simplifile
 import gleam/bit_array
 import gleam/option.{Some}
 import gleeunit
@@ -13,7 +14,7 @@ pub fn chunk_test() {
   Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   |> chunk.to_bit_array()
   |> should.equal(
-    [<<"fmt ">>, <<12:little>>, <<"EXAMPLE_DATA">>] |> bit_array.concat(),
+    [<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>] |> bit_array.concat(),
   )
 }
 
@@ -26,12 +27,12 @@ pub fn list_chunk_test() {
   |> should.equal(
     [
       <<"LIST">>,
-      <<34:little>>,
+      <<40:size(32)-little>>,
       <<"fmt ">>,
-      <<12:little>>,
+      <<12:size(32)-little>>,
       <<"EXAMPLE_DATA">>,
       <<"fmt ">>,
-      <<12:little>>,
+      <<12:size(32)-little>>,
       <<"EXAMPLE_DATA">>,
     ]
     |> bit_array.concat(),
@@ -45,7 +46,41 @@ pub fn riff_chunk_test() {
   riff_chunk
   |> chunk.to_bit_array()
   |> should.equal(
-    [<<"RIFF">>, <<17>>, <<"fmt ">>, <<12>>, <<"EXAMPLE_DATA">>]
+    [<<"RIFF">>, <<20:size(32)-little>>, <<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
+    |> bit_array.concat(),
+  )
+}
+
+pub fn read_chunk_test() {
+  let assert Ok(fmt_chunk): Result(BitArray, simplifile.FileError) = simplifile.read_bits(from: "test/assets/fmt_chunk.riff")
+  fmt_chunk
+  |> should.equal([<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>] |> bit_array.concat())
+}
+
+pub fn read_list_chunk_test() {
+  let assert Ok(list_chunk): Result(BitArray, simplifile.FileError) = simplifile.read_bits(from: "test/assets/list_chunk.riff")
+  list_chunk
+  |> should.equal(
+    [
+      <<"LIST">>,
+      <<40:size(32)-little>>,
+      <<"fmt ">>,
+      <<12:size(32)-little>>,
+      <<"EXAMPLE_DATA">>,
+      <<"fmt ">>,
+      <<12:size(32)-little>>,
+      <<"EXAMPLE_DATA">>,
+    ]
+    |> bit_array.concat(),
+  )
+}
+
+pub fn read_riff_chunk_test() {
+  let assert Ok(riff_chunk): Result(BitArray, simplifile.FileError) = simplifile.read_bits(from: "test/assets/riff_chunk_with_fmt_chunk.riff")
+
+  riff_chunk
+  |> should.equal(
+    [<<"RIFF">>, <<20:size(32)-little>>, <<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
     |> bit_array.concat(),
   )
 }

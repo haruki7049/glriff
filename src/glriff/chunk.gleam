@@ -6,7 +6,7 @@ import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
 pub fn to_bit_array(chunk: Chunk) -> BitArray {
   case chunk {
     Chunk(id, data) -> {
-      let size: BitArray = <<bit_array.byte_size(data)>>
+      let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
       [id, size, data] |> bit_array.concat()
     }
@@ -16,7 +16,7 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
         chunk_list
         |> list.map(fn(v) { v |> to_bit_array() })
         |> bit_array.concat()
-      let size: BitArray = <<bit_array.byte_size(data)>>
+      let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
       [id, size, data] |> bit_array.concat()
     }
@@ -28,7 +28,7 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
           c
           |> to_bit_array()
       }
-      let size: BitArray = <<bit_array.byte_size(data)>>
+      let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
       [id, size, data] |> bit_array.concat()
     }
