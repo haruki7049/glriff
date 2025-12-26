@@ -72,6 +72,7 @@
               # Gleam-lang
               pkgs.gleam
               pkgs.erlang
+              pkgs.nodePackages.nodejs
             ];
           };
         };
