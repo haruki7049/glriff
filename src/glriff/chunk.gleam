@@ -1,7 +1,4 @@
 import gleam/bit_array
-import gleam/int
-import gleam/io
-import gleam/string
 import gleam/list
 import gleam/option.{None, Some}
 import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
@@ -77,26 +74,21 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 }
 
 fn to_chunk_list(bits: BitArray, position: Int) -> List(Chunk) {
-  io.println("position: " <> position |> int.to_string())
-  io.println("bits: " <> bits |> bit_array.inspect())
+  let total_size = bit_array.byte_size(bits)
 
-  case position {
-    0 -> []
-    _ -> {
+  case position >= total_size {
+    True -> []
+    False -> {
       let assert Ok(id): Result(BitArray, Nil) = bit_array.slice(bits, position, 4)
-      let assert Ok(<<size:8, _rest:bits>>) = bit_array.slice(bits, position + 4, 4)
+      let assert Ok(<<size:size(32)-little>>) = bit_array.slice(bits, position + 4, 4)
 
-      io.println("id: " <> id |> string.inspect())
-      io.println("size: " <> size |> int.to_string())
-
-      let assert Ok(data): Result(BitArray, Nil) = bit_array.slice(bits, position, size)
+      let assert Ok(data): Result(BitArray, Nil) = bit_array.slice(bits, position + 8, size)
       assert size == bit_array.byte_size(data)
 
-      let next_position: Int = size + position + 8
+      let next_position: Int = size + position + 8 + size
       let chunk: Chunk = Chunk(id, data)
-      let chunks: List(Chunk) = to_chunk_list(bits, next_position)
 
-      chunks |> list.append([chunk])
+      [chunk, ..to_chunk_list(bits, next_position)]
     }
   }
 }
