@@ -85,7 +85,7 @@ fn to_chunk_list(bits: BitArray, position: Int) -> List(Chunk) {
       let assert Ok(data): Result(BitArray, Nil) = bit_array.slice(bits, position + 8, size)
       assert size == bit_array.byte_size(data)
 
-      let next_position: Int = size + position + 8 + size
+      let next_position: Int = position + 8 + size
       let chunk: Chunk = Chunk(id, data)
 
       [chunk, ..to_chunk_list(bits, next_position)]
