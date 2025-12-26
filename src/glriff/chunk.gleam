@@ -37,7 +37,7 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
 
 pub fn from_bit_array(bits: BitArray) -> Chunk {
   let assert Ok(id): Result(BitArray, Nil) = bit_array.slice(bits, 0, 4)
-  let assert Ok(<<size:8, _rest:bits>>) = bit_array.slice(bits, 4, 4)
+  let assert Ok(<<size:size(32)-little>>) = bit_array.slice(bits, 4, 4)
 
   case id {
     <<"RIFF">> -> {
