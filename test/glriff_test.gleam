@@ -43,6 +43,24 @@ pub fn list_chunk_from_bit_array_test() {
   |> should.equal(expected)
 }
 
+pub fn riff_chunk_from_bit_array_test() {
+  let riff_chunk: BitArray =
+    [
+      <<"RIFF">>,
+      <<20:size(32)-little>>,
+      <<"fmt ">>,
+      <<12:size(32)-little>>,
+      <<"EXAMPLE_DATA">>,
+    ]
+    |> bit_array.concat()
+
+  let expected: Chunk = RiffChunk(Some(Chunk(<<"fmt ">>, <<"EXAMPLE_DATA">>)))
+
+  riff_chunk
+  |> chunk.from_bit_array()
+  |> should.equal(expected)
+}
+
 pub fn chunk_to_bit_array_test() {
   Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   |> chunk.to_bit_array()
