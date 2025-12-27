@@ -20,8 +20,8 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
 
       [id, size, data] |> bit_array.concat()
     }
-    RiffChunk(chunk) -> {
-      let id: BitArray = <<"RIFF">>
+    RiffChunk(four_cc, chunk) -> {
+      let riff_header: BitArray = <<"RIFF">>
       let data: BitArray = case chunk {
         None -> <<0>>
         Some(c) ->
@@ -30,7 +30,7 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
       }
       let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
-      [id, size, data] |> bit_array.concat()
+      [riff_header, size, four_cc, data] |> bit_array.concat()
     }
   }
 }
@@ -41,14 +41,16 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 
   case id {
     <<"RIFF">> -> {
-      let last_index: Int = bit_array.byte_size(bits) - 8
+      let assert Ok(four_cc): Result(BitArray, Nil) = bit_array.slice(bits, 8, 4)
+
+      let last_index: Int = bit_array.byte_size(bits) - 12
       case last_index {
-        0 -> RiffChunk(chunk: None)
+        0 -> RiffChunk(four_cc: four_cc, chunk: None)
         _ -> {
-          let assert Ok(chunk_bits): Result(BitArray, Nil) = bit_array.slice(bits, 8, last_index)
+          let assert Ok(chunk_bits): Result(BitArray, Nil) = bit_array.slice(bits, 12, last_index)
           let chunk: Chunk = from_bit_array(chunk_bits)
 
-          RiffChunk(chunk: Some(chunk))
+          RiffChunk(four_cc: four_cc, chunk: Some(chunk))
         }
       }
     }
