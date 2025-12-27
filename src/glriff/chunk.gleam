@@ -5,10 +5,10 @@ import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
 
 pub fn to_bit_array(chunk: Chunk) -> BitArray {
   case chunk {
-    Chunk(id, data) -> {
+    Chunk(four_cc, data) -> {
       let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
-      [id, size, data] |> bit_array.concat()
+      [four_cc, size, data] |> bit_array.concat()
     }
     ListChunk(chunk_list) -> {
       let id: BitArray = <<"LIST">>

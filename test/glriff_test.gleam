@@ -15,7 +15,7 @@ pub fn chunk_from_bit_array_test() {
     [<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
     |> bit_array.concat()
 
-  let expected: Chunk = Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  let expected: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
 
   fmt_chunk
   |> chunk.from_bit_array()
@@ -62,7 +62,7 @@ pub fn riff_chunk_from_bit_array_test() {
 }
 
 pub fn chunk_to_bit_array_test() {
-  Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   |> chunk.to_bit_array()
   |> should.equal(
     [<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
@@ -71,7 +71,7 @@ pub fn chunk_to_bit_array_test() {
 }
 
 pub fn list_chunk_to_bit_array_test() {
-  let fmt_chunk: Chunk = Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   let list_chunk: Chunk = ListChunk(chunks: [fmt_chunk, fmt_chunk])
 
   list_chunk
@@ -92,7 +92,7 @@ pub fn list_chunk_to_bit_array_test() {
 }
 
 pub fn riff_chunk_to_bit_array_test() {
-  let fmt_chunk: Chunk = Chunk(id: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
   let riff_chunk: Chunk = RiffChunk(chunk: Some(fmt_chunk))
 
   riff_chunk
