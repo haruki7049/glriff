@@ -18,12 +18,12 @@ pub type Chunk {
   /// The `four_cc` field is a 4-byte identifier (e.g., "fmt ", "data").
   /// The `data` field contains the chunk's binary payload.
   Chunk(four_cc: BitArray, data: BitArray)
-  
+
   /// A LIST chunk that contains multiple sub-chunks.
   ///
   /// LIST chunks are used to group related chunks together.
   ListChunk(chunks: List(Chunk))
-  
+
   /// A RIFF chunk representing the root container of a RIFF file.
   ///
   /// The `four_cc` field specifies the file type (e.g., "WAVE" for WAV files).
@@ -84,7 +84,7 @@ pub type FromBitArrayError {
   /// This error wraps a `ToChunkListError` that provides more detail about
   /// what went wrong during chunk list parsing.
   FailedToCreateChunkList(inner: ToChunkListError)
-  
+
   /// The binary data does not conform to the RIFF format specification.
   ///
   /// This can occur when:
@@ -184,13 +184,13 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
 pub type ToChunkListError {
   /// The chunk identifier (FourCC) could not be read from the expected position.
   InvalidId
-  
+
   /// The chunk size field could not be read from the expected position.
   InvalidSize
-  
+
   /// The chunk data could not be read from the expected position.
   InvalidData
-  
+
   /// The declared chunk size does not match the actual available data.
   ///
   /// The `size` field contains the declared size from the chunk header.
