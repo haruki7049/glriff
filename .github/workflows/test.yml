@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@v1.20.4
         with:
           otp-version: "28"
           gleam-version: "1.13.0"
