@@ -1,5 +1,7 @@
 import gleam/bit_array
+import gleam/bool
 import gleam/list
+import gleam/result
 
 pub type Chunk {
   Chunk(four_cc: BitArray, data: BitArray)
@@ -54,7 +56,8 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
       case last_index {
         0 -> Ok(RiffChunk(four_cc: four_cc, chunks: []))
         _ -> {
-          let chunks: Result(List(Chunk), ToChunkListError) = to_chunk_list(bits, 12)
+          let chunks: Result(List(Chunk), ToChunkListError) =
+            to_chunk_list(bits, 12)
 
           case chunks {
             Ok(values) -> Ok(RiffChunk(four_cc: four_cc, chunks: values))
@@ -68,7 +71,8 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
       case last_index {
         0 -> Ok(ListChunk(chunks: []))
         _ -> {
-          let chunks: Result(List(Chunk), ToChunkListError) = to_chunk_list(bits, 8)
+          let chunks: Result(List(Chunk), ToChunkListError) =
+            to_chunk_list(bits, 8)
 
           case chunks {
             Ok(values) -> Ok(ListChunk(chunks: values))
@@ -88,22 +92,47 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
   }
 }
 
-pub type ToChunkListError {}
+pub type ToChunkListError {
+  InvalidId
+  InvalidSize
+  InvalidData
+  SizeIsDifference(size: Int, expected: Int)
+}
 
-fn to_chunk_list(bits: BitArray, position: Int) -> Result(List(Chunk), ToChunkListError) {
+fn to_chunk_list(
+  bits: BitArray,
+  position: Int,
+) -> Result(List(Chunk), ToChunkListError) {
   let total_size = bit_array.byte_size(bits)
 
   case position >= total_size {
     True -> Ok([])
     False -> {
-      let assert Ok(id): Result(BitArray, Nil) =
+      use id: BitArray <- result.try(
         bit_array.slice(bits, position, 4)
-      let assert Ok(<<size:size(32)-little>>) =
-        bit_array.slice(bits, position + 4, 4)
+        |> result.replace_error(InvalidId),
+      )
 
-      let assert Ok(data): Result(BitArray, Nil) =
+      use size_bits <- result.try(
+        bit_array.slice(bits, position + 4, 4)
+        |> result.replace_error(InvalidSize),
+      )
+
+      // Pattern match on the sliced bits for size
+      let assert <<size:size(32)-little>> = size_bits
+
+      use data <- result.try(
         bit_array.slice(bits, position + 8, size)
-      assert size == bit_array.byte_size(data)
+        |> result.replace_error(InvalidData),
+      )
+
+      use <- bool.guard(
+        when: size != bit_array.byte_size(data),
+        return: Error(SizeIsDifference(
+          size: size,
+          expected: bit_array.byte_size(data),
+        )),
+      )
 
       let next_position: Int = position + 8 + size
       let chunk: Chunk = Chunk(id, data)
