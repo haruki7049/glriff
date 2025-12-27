@@ -116,11 +116,11 @@ pub fn riff_chunk_to_bit_array_test() {
 pub fn read_chunk_test() {
   let assert Ok(fmt_chunk): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/fmt_chunk.riff")
+  let expected: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+
   fmt_chunk
-  |> should.equal(
-    [<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
-    |> bit_array.concat(),
-  )
+  |> chunk.from_bit_array()
+  |> should.equal(expected)
 }
 
 /// To check whether the binary expression on my tests is exact or not.
@@ -128,20 +128,12 @@ pub fn read_chunk_test() {
 pub fn read_list_chunk_test() {
   let assert Ok(list_chunk): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/list_chunk.riff")
+  let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  let expected: Chunk = ListChunk(chunks: [fmt_chunk, fmt_chunk])
+
   list_chunk
-  |> should.equal(
-    [
-      <<"LIST">>,
-      <<40:size(32)-little>>,
-      <<"fmt ">>,
-      <<12:size(32)-little>>,
-      <<"EXAMPLE_DATA">>,
-      <<"fmt ">>,
-      <<12:size(32)-little>>,
-      <<"EXAMPLE_DATA">>,
-    ]
-    |> bit_array.concat(),
-  )
+  |> chunk.from_bit_array()
+  |> should.equal(expected)
 }
 
 /// To check whether the binary expression on my tests is exact or not.
@@ -149,16 +141,10 @@ pub fn read_list_chunk_test() {
 pub fn read_riff_chunk_test() {
   let assert Ok(riff_chunk): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/riff_chunk_with_fmt_chunk.riff")
+  let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
+  let expected: Chunk = RiffChunk(four_cc: <<"TEST">>, chunk: Some(fmt_chunk))
 
   riff_chunk
-  |> should.equal(
-    [
-      <<"RIFF">>,
-      <<20:size(32)-little>>,
-      <<"fmt ">>,
-      <<12:size(32)-little>>,
-      <<"EXAMPLE_DATA">>,
-    ]
-    |> bit_array.concat(),
-  )
+  |> chunk.from_bit_array()
+  |> should.equal(expected)
 }
