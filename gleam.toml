@@ -1,5 +1,5 @@
 name = "glriff"
-version = "1.0.0"
+version = "1.0.1"
 description = "A library to express RIFF format in pure Gleam-lang"
 licenses = ["Apache-2.0"]
 repository = { type = "github", user = "haruki7049", repo = "glriff" }
