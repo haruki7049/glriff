@@ -41,28 +41,39 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
 
 pub type FromBitArrayError {
   FailedToCreateChunkList(inner: ToChunkListError)
+  InvalidFormat
 }
 
 pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
-  let assert Ok(id): Result(BitArray, Nil) = bit_array.slice(bits, 0, 4)
-  let assert Ok(<<size:size(32)-little>>) = bit_array.slice(bits, 4, 4)
+  use id <- result.try(
+    bit_array.slice(bits, 0, 4)
+    |> result.replace_error(InvalidFormat),
+  )
+
+  use size_bits <- result.try(
+    bit_array.slice(bits, 4, 4)
+    |> result.replace_error(InvalidFormat),
+  )
+
+  let assert <<size:size(32)-little>> = size_bits
 
   case id {
     <<"RIFF">> -> {
-      let assert Ok(four_cc): Result(BitArray, Nil) =
+      use four_cc <- result.try(
         bit_array.slice(bits, 8, 4)
+        |> result.replace_error(InvalidFormat),
+      )
 
       let last_index: Int = bit_array.byte_size(bits) - 12
       case last_index {
         0 -> Ok(RiffChunk(four_cc: four_cc, chunks: []))
         _ -> {
-          let chunks: Result(List(Chunk), ToChunkListError) =
+          use chunks <- result.try(
             to_chunk_list(bits, 12)
+            |> result.map_error(FailedToCreateChunkList)
+          )
 
-          case chunks {
-            Ok(values) -> Ok(RiffChunk(four_cc: four_cc, chunks: values))
-            Error(err) -> Error(FailedToCreateChunkList(err))
-          }
+          Ok(RiffChunk(four_cc: four_cc, chunks: chunks))
         }
       }
     }
@@ -71,23 +82,23 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
       case last_index {
         0 -> Ok(ListChunk(chunks: []))
         _ -> {
-          let chunks: Result(List(Chunk), ToChunkListError) =
+          use chunks <- result.try(
             to_chunk_list(bits, 8)
+            |> result.map_error(FailedToCreateChunkList)
+          )
 
-          case chunks {
-            Ok(values) -> Ok(ListChunk(chunks: values))
-            Error(err) -> Error(FailedToCreateChunkList(err))
-          }
+          Ok(ListChunk(chunks: chunks))
         }
       }
     }
     _ -> {
       let last_index: Int = bit_array.byte_size(bits) - 8
-      let assert Ok(data) = bit_array.slice(bits, 8, last_index)
+      use data <- result.try(bit_array.slice(bits, 8, last_index) |> result.replace_error(InvalidFormat))
 
-      assert size == bit_array.byte_size(data)
-
-      Ok(Chunk(id, data))
+      case size == bit_array.byte_size(data) {
+        True -> Ok(Chunk(id, data))
+        False -> Error(InvalidFormat)
+      }
     }
   }
 }
