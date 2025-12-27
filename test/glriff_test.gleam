@@ -1,4 +1,5 @@
 import gleam/bit_array
+import gleam/io
 import gleam/option.{Some}
 import gleeunit
 import gleeunit/should
@@ -153,6 +154,73 @@ pub fn read_riff_chunk_test() {
   let expected: Chunk = RiffChunk(four_cc: <<"TEST">>, chunk: Some(fmt_chunk))
 
   riff_chunk
+  |> chunk.from_bit_array()
+  |> should.equal(expected)
+}
+
+pub fn read_wavefile_test() {
+  let assert Ok(wavefile): Result(BitArray, simplifile.FileError) =
+    simplifile.read_bits(from: "test/assets/test_data.wav")
+  let expected_chunk: Chunk =
+    Chunk(four_cc: <<"fmt ">>, data: <<
+      1,
+      0,
+      1,
+      0,
+      68,
+      172,
+      0,
+      0,
+      136,
+      88,
+      1,
+      0,
+      2,
+      0,
+      16,
+      0,
+      100,
+      97,
+      116,
+      97,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0,
+      54,
+      3,
+      101,
+      6,
+      149,
+      9,
+      178,
+      12,
+      204,
+      15,
+      204,
+      18,
+      195,
+      21,
+      156,
+      24,
+      98,
+      27,
+    >>)
+  let expected: Chunk =
+    RiffChunk(four_cc: <<"WAVE">>, chunk: Some(expected_chunk))
+
+  wavefile
+  |> bit_array.inspect()
+  |> io.println()
+
+  expected
+  |> chunk.to_bit_array()
+  |> bit_array.inspect()
+  |> io.println()
+
+  wavefile
   |> chunk.from_bit_array()
   |> should.equal(expected)
 }
