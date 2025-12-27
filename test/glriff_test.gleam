@@ -1,8 +1,11 @@
+import gleam/result
 import gleam/bit_array
 import gleeunit
 import gleeunit/should
 import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
 import simplifile
+
+const error_chunk: Chunk = Chunk(four_cc: <<"ERR ">>, data: <<"THIS_IS_ERR_DATA">>)
 
 pub fn main() {
   gleeunit.main()
@@ -17,6 +20,7 @@ pub fn chunk_from_bit_array_test() {
 
   fmt_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -42,6 +46,7 @@ pub fn list_chunk_from_bit_array_test() {
 
   list_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -64,6 +69,7 @@ pub fn riff_chunk_from_bit_array_test() {
 
   riff_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -125,6 +131,7 @@ pub fn read_chunk_test() {
 
   fmt_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -138,6 +145,7 @@ pub fn read_list_chunk_test() {
 
   list_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -151,6 +159,7 @@ pub fn read_riff_chunk_test() {
 
   riff_chunk
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }
 
@@ -171,5 +180,6 @@ pub fn read_wavefile_test() {
 
   wavefile
   |> glriff.from_bit_array()
+  |> result.unwrap(error_chunk)
   |> should.equal(expected)
 }

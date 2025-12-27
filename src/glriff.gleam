@@ -37,7 +37,11 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
   }
 }
 
-pub fn from_bit_array(bits: BitArray) -> Chunk {
+pub type FromBitArrayError {
+  FailedToCreateChunkList(inner: ToChunkListError)
+}
+
+pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
   let assert Ok(id): Result(BitArray, Nil) = bit_array.slice(bits, 0, 4)
   let assert Ok(<<size:size(32)-little>>) = bit_array.slice(bits, 4, 4)
 
@@ -48,20 +52,28 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 
       let last_index: Int = bit_array.byte_size(bits) - 12
       case last_index {
-        0 -> RiffChunk(four_cc: four_cc, chunks: [])
+        0 -> Ok(RiffChunk(four_cc: four_cc, chunks: []))
         _ -> {
-          let chunks: List(Chunk) = to_chunk_list(bits, 12)
-          RiffChunk(four_cc: four_cc, chunks: chunks)
+          let chunks: Result(List(Chunk), ToChunkListError) = to_chunk_list(bits, 12)
+
+          case chunks {
+            Ok(values) -> Ok(RiffChunk(four_cc: four_cc, chunks: values))
+            Error(err) -> Error(FailedToCreateChunkList(err))
+          }
         }
       }
     }
     <<"LIST">> -> {
       let last_index: Int = bit_array.byte_size(bits) - 8
       case last_index {
-        0 -> ListChunk(chunks: [])
+        0 -> Ok(ListChunk(chunks: []))
         _ -> {
-          let chunks: List(Chunk) = to_chunk_list(bits, 8)
-          ListChunk(chunks: chunks)
+          let chunks: Result(List(Chunk), ToChunkListError) = to_chunk_list(bits, 8)
+
+          case chunks {
+            Ok(values) -> Ok(ListChunk(chunks: values))
+            Error(err) -> Error(FailedToCreateChunkList(err))
+          }
         }
       }
     }
@@ -71,16 +83,18 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 
       assert size == bit_array.byte_size(data)
 
-      Chunk(id, data)
+      Ok(Chunk(id, data))
     }
   }
 }
 
-fn to_chunk_list(bits: BitArray, position: Int) -> List(Chunk) {
+pub type ToChunkListError {}
+
+fn to_chunk_list(bits: BitArray, position: Int) -> Result(List(Chunk), ToChunkListError) {
   let total_size = bit_array.byte_size(bits)
 
   case position >= total_size {
-    True -> []
+    True -> Ok([])
     False -> {
       let assert Ok(id): Result(BitArray, Nil) =
         bit_array.slice(bits, position, 4)
@@ -94,7 +108,13 @@ fn to_chunk_list(bits: BitArray, position: Int) -> List(Chunk) {
       let next_position: Int = position + 8 + size
       let chunk: Chunk = Chunk(id, data)
 
-      [chunk, ..to_chunk_list(bits, next_position)]
+      let rest_chunks: Result(List(Chunk), ToChunkListError) =
+        to_chunk_list(bits, next_position)
+
+      case rest_chunks {
+        Ok(values) -> Ok([chunk, ..values])
+        Error(err) -> Error(err)
+      }
     }
   }
 }
