@@ -70,7 +70,7 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
         _ -> {
           use chunks <- result.try(
             to_chunk_list(bits, 12)
-            |> result.map_error(FailedToCreateChunkList)
+            |> result.map_error(FailedToCreateChunkList),
           )
 
           Ok(RiffChunk(four_cc: four_cc, chunks: chunks))
@@ -84,7 +84,7 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
         _ -> {
           use chunks <- result.try(
             to_chunk_list(bits, 8)
-            |> result.map_error(FailedToCreateChunkList)
+            |> result.map_error(FailedToCreateChunkList),
           )
 
           Ok(ListChunk(chunks: chunks))
@@ -93,7 +93,10 @@ pub fn from_bit_array(bits: BitArray) -> Result(Chunk, FromBitArrayError) {
     }
     _ -> {
       let last_index: Int = bit_array.byte_size(bits) - 8
-      use data <- result.try(bit_array.slice(bits, 8, last_index) |> result.replace_error(InvalidFormat))
+      use data <- result.try(
+        bit_array.slice(bits, 8, last_index)
+        |> result.replace_error(InvalidFormat),
+      )
 
       case size == bit_array.byte_size(data) {
         True -> Ok(Chunk(id, data))
