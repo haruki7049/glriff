@@ -1,7 +1,10 @@
 name: nix-checker
+
 on:
   push:
+
 permissions: {}
+
 jobs:
   run-nix-check:
     runs-on: ubuntu-latest
@@ -14,6 +17,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Run nix flake check
         run: nix flake check --all-systems
+
   run-nix-build:
     runs-on: ubuntu-latest
     steps:
