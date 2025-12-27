@@ -43,6 +43,7 @@ pub type Chunk {
 /// ```gleam
 /// let chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
 /// let binary = to_bit_array(chunk)
+/// // Returns: <<"fmt ", 12:size(32)-little, "EXAMPLE_DATA">>
 /// ```
 ///
 pub fn to_bit_array(chunk: Chunk) -> BitArray {
@@ -109,9 +110,7 @@ pub type FromBitArrayError {
 /// ## Examples
 ///
 /// ```gleam
-/// let binary = <<
-///   "fmt ", 12:size(32)-little, "EXAMPLE_DATA"
-/// >>
+/// let binary = <<"fmt ", 12:size(32)-little, "EXAMPLE_DATA">>
 /// case from_bit_array(binary) {
 ///   Ok(chunk) -> // Successfully parsed chunk
 ///   Error(InvalidFormat) -> // Invalid RIFF data
