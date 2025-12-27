@@ -1,6 +1,5 @@
 import gleam/bit_array
 import gleam/list
-import gleam/option.{None, Some}
 import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
 
 pub fn to_bit_array(chunk: Chunk) -> BitArray {
@@ -20,14 +19,12 @@ pub fn to_bit_array(chunk: Chunk) -> BitArray {
 
       [id, size, data] |> bit_array.concat()
     }
-    RiffChunk(four_cc, chunk) -> {
+    RiffChunk(four_cc, chunk_list) -> {
       let riff_header: BitArray = <<"RIFF">>
-      let data: BitArray = case chunk {
-        None -> <<0>>
-        Some(c) ->
-          c
-          |> to_bit_array()
-      }
+      let data: BitArray =
+        chunk_list
+        |> list.map(fn(v) { v |> to_bit_array() })
+        |> bit_array.concat()
       let size: BitArray = <<bit_array.byte_size(data):size(32)-little>>
 
       [riff_header, size, four_cc, data] |> bit_array.concat()
@@ -46,13 +43,10 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 
       let last_index: Int = bit_array.byte_size(bits) - 12
       case last_index {
-        0 -> RiffChunk(four_cc: four_cc, chunk: None)
+        0 -> RiffChunk(four_cc: four_cc, chunks: [])
         _ -> {
-          let assert Ok(chunk_bits): Result(BitArray, Nil) =
-            bit_array.slice(bits, 12, last_index)
-          let chunk: Chunk = from_bit_array(chunk_bits)
-
-          RiffChunk(four_cc: four_cc, chunk: Some(chunk))
+          let chunks: List(Chunk) = to_chunk_list(bits, 12)
+          RiffChunk(four_cc: four_cc, chunks: chunks)
         }
       }
     }

@@ -1,6 +1,4 @@
 import gleam/bit_array
-import gleam/io
-import gleam/option.{Some}
 import gleeunit
 import gleeunit/should
 import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
@@ -61,10 +59,9 @@ pub fn riff_chunk_from_bit_array_test() {
     |> bit_array.concat()
 
   let expected: Chunk =
-    RiffChunk(
-      four_cc: <<"TEST">>,
-      chunk: Some(Chunk(<<"fmt ">>, <<"EXAMPLE_DATA">>)),
-    )
+    RiffChunk(four_cc: <<"TEST">>, chunks: [
+      Chunk(<<"fmt ">>, <<"EXAMPLE_DATA">>),
+    ])
 
   riff_chunk
   |> chunk.from_bit_array()
@@ -103,7 +100,7 @@ pub fn list_chunk_to_bit_array_test() {
 
 pub fn riff_chunk_to_bit_array_test() {
   let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
-  let riff_chunk: Chunk = RiffChunk(four_cc: <<"TEST">>, chunk: Some(fmt_chunk))
+  let riff_chunk: Chunk = RiffChunk(four_cc: <<"TEST">>, chunks: [fmt_chunk])
 
   riff_chunk
   |> chunk.to_bit_array()
@@ -151,7 +148,7 @@ pub fn read_riff_chunk_test() {
   let assert Ok(riff_chunk): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/riff_chunk_with_fmt_chunk.riff")
   let fmt_chunk: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
-  let expected: Chunk = RiffChunk(four_cc: <<"TEST">>, chunk: Some(fmt_chunk))
+  let expected: Chunk = RiffChunk(four_cc: <<"TEST">>, chunks: [fmt_chunk])
 
   riff_chunk
   |> chunk.from_bit_array()
@@ -161,64 +158,17 @@ pub fn read_riff_chunk_test() {
 pub fn read_wavefile_test() {
   let assert Ok(wavefile): Result(BitArray, simplifile.FileError) =
     simplifile.read_bits(from: "test/assets/test_data.wav")
-  let expected_chunk: Chunk =
+  let fmt_chunk: Chunk =
     Chunk(four_cc: <<"fmt ">>, data: <<
-      1,
-      0,
-      1,
-      0,
-      68,
-      172,
-      0,
-      0,
-      136,
-      88,
-      1,
-      0,
-      2,
-      0,
-      16,
-      0,
-      100,
-      97,
-      116,
-      97,
-      20,
-      0,
-      0,
-      0,
-      0,
-      0,
-      54,
-      3,
-      101,
-      6,
-      149,
-      9,
-      178,
-      12,
-      204,
-      15,
-      204,
-      18,
-      195,
-      21,
-      156,
-      24,
-      98,
-      27,
+      1, 0, 1, 0, 68, 172, 0, 0, 136, 88, 1, 0, 2, 0, 16, 0,
+    >>)
+  let data_chunk: Chunk =
+    Chunk(four_cc: <<"data">>, data: <<
+      0, 0, 54, 3, 101, 6, 149, 9, 178, 12, 204, 15, 204, 18, 195, 21, 156, 24,
+      98, 27,
     >>)
   let expected: Chunk =
-    RiffChunk(four_cc: <<"WAVE">>, chunk: Some(expected_chunk))
-
-  wavefile
-  |> bit_array.inspect()
-  |> io.println()
-
-  expected
-  |> chunk.to_bit_array()
-  |> bit_array.inspect()
-  |> io.println()
+    RiffChunk(four_cc: <<"WAVE">>, chunks: [fmt_chunk, data_chunk])
 
   wavefile
   |> chunk.from_bit_array()
