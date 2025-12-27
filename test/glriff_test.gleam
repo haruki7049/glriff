@@ -2,7 +2,6 @@ import gleam/bit_array
 import gleeunit
 import gleeunit/should
 import glriff.{type Chunk, Chunk, ListChunk, RiffChunk}
-import glriff/chunk
 import simplifile
 
 pub fn main() {
@@ -17,7 +16,7 @@ pub fn chunk_from_bit_array_test() {
   let expected: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
 
   fmt_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
@@ -42,7 +41,7 @@ pub fn list_chunk_from_bit_array_test() {
     ])
 
   list_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
@@ -64,13 +63,13 @@ pub fn riff_chunk_from_bit_array_test() {
     ])
 
   riff_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
 pub fn chunk_to_bit_array_test() {
   Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
-  |> chunk.to_bit_array()
+  |> glriff.to_bit_array()
   |> should.equal(
     [<<"fmt ">>, <<12:size(32)-little>>, <<"EXAMPLE_DATA">>]
     |> bit_array.concat(),
@@ -82,7 +81,7 @@ pub fn list_chunk_to_bit_array_test() {
   let list_chunk: Chunk = ListChunk(chunks: [fmt_chunk, fmt_chunk])
 
   list_chunk
-  |> chunk.to_bit_array()
+  |> glriff.to_bit_array()
   |> should.equal(
     [
       <<"LIST">>,
@@ -103,7 +102,7 @@ pub fn riff_chunk_to_bit_array_test() {
   let riff_chunk: Chunk = RiffChunk(four_cc: <<"TEST">>, chunks: [fmt_chunk])
 
   riff_chunk
-  |> chunk.to_bit_array()
+  |> glriff.to_bit_array()
   |> should.equal(
     [
       <<"RIFF">>,
@@ -125,7 +124,7 @@ pub fn read_chunk_test() {
   let expected: Chunk = Chunk(four_cc: <<"fmt ">>, data: <<"EXAMPLE_DATA">>)
 
   fmt_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
@@ -138,7 +137,7 @@ pub fn read_list_chunk_test() {
   let expected: Chunk = ListChunk(chunks: [fmt_chunk, fmt_chunk])
 
   list_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
@@ -151,7 +150,7 @@ pub fn read_riff_chunk_test() {
   let expected: Chunk = RiffChunk(four_cc: <<"TEST">>, chunks: [fmt_chunk])
 
   riff_chunk
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
 
@@ -171,6 +170,6 @@ pub fn read_wavefile_test() {
     RiffChunk(four_cc: <<"WAVE">>, chunks: [fmt_chunk, data_chunk])
 
   wavefile
-  |> chunk.from_bit_array()
+  |> glriff.from_bit_array()
   |> should.equal(expected)
 }
