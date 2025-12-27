@@ -41,13 +41,15 @@ pub fn from_bit_array(bits: BitArray) -> Chunk {
 
   case id {
     <<"RIFF">> -> {
-      let assert Ok(four_cc): Result(BitArray, Nil) = bit_array.slice(bits, 8, 4)
+      let assert Ok(four_cc): Result(BitArray, Nil) =
+        bit_array.slice(bits, 8, 4)
 
       let last_index: Int = bit_array.byte_size(bits) - 12
       case last_index {
         0 -> RiffChunk(four_cc: four_cc, chunk: None)
         _ -> {
-          let assert Ok(chunk_bits): Result(BitArray, Nil) = bit_array.slice(bits, 12, last_index)
+          let assert Ok(chunk_bits): Result(BitArray, Nil) =
+            bit_array.slice(bits, 12, last_index)
           let chunk: Chunk = from_bit_array(chunk_bits)
 
           RiffChunk(four_cc: four_cc, chunk: Some(chunk))
@@ -81,10 +83,13 @@ fn to_chunk_list(bits: BitArray, position: Int) -> List(Chunk) {
   case position >= total_size {
     True -> []
     False -> {
-      let assert Ok(id): Result(BitArray, Nil) = bit_array.slice(bits, position, 4)
-      let assert Ok(<<size:size(32)-little>>) = bit_array.slice(bits, position + 4, 4)
+      let assert Ok(id): Result(BitArray, Nil) =
+        bit_array.slice(bits, position, 4)
+      let assert Ok(<<size:size(32)-little>>) =
+        bit_array.slice(bits, position + 4, 4)
 
-      let assert Ok(data): Result(BitArray, Nil) = bit_array.slice(bits, position + 8, size)
+      let assert Ok(data): Result(BitArray, Nil) =
+        bit_array.slice(bits, position + 8, size)
       assert size == bit_array.byte_size(data)
 
       let next_position: Int = position + 8 + size
